@@ -1,9 +1,9 @@
 #include <avr/io.h>
 
 void usart_init(){
-    //Set baud rate
-	UBRR0H = (unsigned char)(UBRRVAL >> 8);   //high byte
-    UBRR0L = (unsigned char)UBRRVAL;     			//low byte
+	//Set baud rate to 9600
+    // bps = 16Mhz/ (16(X + 1)) ==> X = 103.16 in decimal
+    UBRR0L = 0x67;     			//low byte
 
 	//Enable Transmitter and Receiver and Interrupt on receive complete
     UCSR0B |= (1 << TXEN0);
@@ -19,7 +19,7 @@ void usart_send(unsigned char MSG){
     UDR0 = MSG;  
 }
 
-unsigned char usart_receive(void){
+unsigned char usart_receive(){
 	while(!(UCSRA & (1<<RXC)));
 		return UDR;
 }
