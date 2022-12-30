@@ -19,6 +19,8 @@ char* encrypt(char *message, int key){
         i++;
     }
 
+    message[i] = '\0';
+    
     //return the encrypted message
     return message;
 }
