@@ -8,13 +8,14 @@ Kasthuripitiya K.A.I.M.
 #include "caesar_cipher.c"
 #include <stdlib.h>
 #include <util/delay.h>
+#include "keypad.c"
 
 #define DEFAULT_KEY '3'
 
 int main(int argc , char** argv){
 
     //store the string
-    char* str ;
+    char str[11] ;
 
     //write default key to address 0
     EEPROMwrite(0 , DEFAULT_KEY);
@@ -23,65 +24,87 @@ int main(int argc , char** argv){
     usart_init();
 
     while(1){
+
+        sendstr("Encrypt(A) or Change(C) Default Secret Key : ");
+
+        //detect the char 'U' first for unknown behaviour
+        readThePressedKey();
+        char option = readThePressedKey();
         
-        //display this message
-        sendstr("Enter an Text : ");
+        if(option == 'A'){
 
-        //receive the text first
-        str = receivestr();
+            sendstr("Enter an text : ");
 
-        sendstr("Encrypt(E) or Change(C) Default Secret Key : ");
+            //stop reading the already selected option
+            readThePressedKey();
+            unsigned int i = 0 ;
+            //start reading the array of characters length of 10
+            while(i < 10){
+                char lettter = readThePressedKey();
+                str[i] = lettter;
+                i++;
+            }
+            str[i] = '\0';
 
-        //get the option as read or write
-        char option = usart_receive();
-
-        //receive the newline character
-        usart_receive();
-
-        if(option == 'E'){
+            //send the result
+            // sendstr(str);
 
             //read the key from eeprom
             int key = EEPROMread(0) - '0';
 
-            //do the encryption
-            str = encrypt(str , key);
-            
-            sendstr("Encryption done!");
+            char* encrypted = encrypt(str , key);
+            // free(str);
 
-            sendstr(str);
-            free(str);
+            //send the result
+            sendstr(encrypted);
+
+            //remove the pointer
+            free(encrypted);
+
         }
         else if(option == 'C'){
+            sendstr("Enter the new Key : ");
 
-            //asking for the new key
-            sendstr("Enter the new key : ");
+            //stop reading the already selected option
+            readThePressedKey();
 
-            //get the option as read or write
-            char keyVal = usart_receive();
-
-            //receive the newline character
-            usart_receive();
+            char newKey = readThePressedKey();
 
             //write the new key to eeprom's 0th address
             //in future this will be used as the key
-            EEPROMwrite(0 , keyVal);
+            EEPROMwrite(0 , newKey);
+
+            sendstr("Enter an text : ");
+
+            //stop reading the already selected option
+            readThePressedKey();
+
+            unsigned int i = 0 ;
+            //start reading the array of characters length of 10
+            while(i < 10){
+                char lettter = readThePressedKey();
+                str[i] = lettter;
+                i++;
+            }
+            str[i] = '\0';
 
             //read the key from eeprom
             int secretKey = EEPROMread(0) - '0';
 
-            str = encrypt(str , secretKey);
+            char* encrypted = encrypt(str , secretKey);
 
-            //write the data to the eeprom starting from the address 0
-            sendstr("Encryption done!");
+            //send the result
+            sendstr(encrypted);
 
-            sendstr(str);
-            free(str);
-            
+            //remove the pointer
+            free(encrypted);
         }
-        else{
-            free(str);
-            continue;
-        }
+        // else{
+        //     str[0] = option;
+        //     str[1] = '\0';
+        //     sendstr(str);
+        // }
+        
     }
 
     return 0 ;
