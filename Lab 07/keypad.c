@@ -3,9 +3,9 @@ E / 18 / 173
 Kasthuripitiya K.A.I.M.
 */
 #include <avr/io.h>
-#include "usart.c"
 #include <util/delay.h>
 #include <string.h>
+// #include "usart.c"
 
 char keypad[4][4] = {{'1', '2', '3', 'A'},
 					{'4', '5', '6', 'B'},
@@ -108,18 +108,21 @@ char readThePressedKey(){
     if(strchr(data , pressedLetter) != NULL){
         return pressedLetter;
     }
-    
+    else{
+        //this will be returned for undefined characters
+        return '\0';
+    }
+    // return pressedLetter;
     // sendstr(str);
 }
 
-int main(){
-    
-    usart_init();
-    while(1){
-        char c[2] = {readThePressedKey() , '\0'};
-        sendstr(c);
-        // readThePressedKey();
-        _delay_ms(2000);
-    }
-    return 0 ;
-}
+// int main(){
+//     usart_init();
+//     while(1){
+//         char c[2] = {readThePressedKey() , '\0'};
+//         sendstr(c);
+//         // readThePressedKey();
+//         _delay_ms(2000);
+//     }
+//     return 0 ;
+// }
